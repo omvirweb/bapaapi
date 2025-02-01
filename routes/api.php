@@ -21,23 +21,23 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/profile', [AuthController::class, 'getProfile']);
 
     Route::get('/item-stock-rfid/{id}', [ItemStockRfidController::class, 'getDetails']);
+
+    Route::get('/item_list',[ItemController::class, 'itemList']);
+    Route::get('/party_list', [PartyController::class, 'partyList']);
+    Route::post('/sell_item', [TransactionController::class, 'sellItem']);
+    Route::post('/get_pdf',[TransactionController::class, 'getPdf']);
 });
 
 
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 
-Route::post('/sell_item', [TransactionController::class, 'sellItem']);
 Route::post('/receive_item', [TransactionController::class, 'receiveItem']);
 
-Route::post('/get_pdf',[TransactionController::class, 'getPdf']);
 
 Route::post('/fine_balance', [BalanceController::class, 'fineBalance']);
 Route::post('/touchwise_balance', [BalanceController::class, 'touchwiseBalance']);
 Route::post('/ledger',[BalanceController::class, 'ledgerBalance']);
 Route::post('/curret_stock',[BalanceController::class, 'currentStock']);
-
-Route::get('/party_list', [PartyController::class, 'partyList']);
-Route::get('/item_list',[ItemController::class, 'itemList']);
 
 
 route::post('/delete',[TransactionController::class,'deleteTransaction']);
