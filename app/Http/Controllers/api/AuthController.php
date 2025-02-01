@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Models\UserMaster;
 use App\Models\userslogin;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -13,6 +14,60 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     public function login(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
+        $user = UserMaster::where('login_username', $request->username)
+            ->where('status', 0)
+            ->first();
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid username or account is inactive.',
+            ], 404);
+        }
+        if ($request->password != $user->user_password) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid password.',
+            ], 401);
+        }
+        $token = $user->createToken('auth_token')->plainTextToken;
+        return response()->json([
+            'status' => true,
+            'message' => 'Login successful.',
+            'token' => $token,
+        ]);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json([
+            'status' => true,
+            'message' => 'Logged out successfully.',
+        ]);
+    }
+
+    public function getProfile(Request $request)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found.',
+            ], 404);
+        }
+        return response()->json([
+            'status' => true,
+            'message' => 'Profile fetched successfully.',
+            'data' => $user,
+        ]);
+    }
+
+    public function old_login(Request $request)
     {
         // Define the master number and OTP
         $masterNumber = '9727691355';
