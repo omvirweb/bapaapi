@@ -18,51 +18,53 @@ class ItemController extends Controller
     {
         try {
             // Log the request data
-            TransactionsLog::create([
-                'request_data' => json_encode($request->all()),
-            ]);
+            // TransactionsLog::create([
+            //     'request_data' => json_encode($request->all()),
+            // ]);
             // Retrieve the api_token from the request parameters
-            $apiToken = $request->input('api_token');
-            $deviceName = $request->input('device_name') ?? 'Unknown Device';
+            // $apiToken = $request->input('api_token');
+            // $deviceName = $request->input('device_name') ?? 'Unknown Device';
 
             // Check if the api_token was provided
-            if (!$apiToken) {
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'Authorization token not provided',
-                ], 200); // Bad Request
-            }
+
+            // if (!$apiToken) {
+            //     return response()->json([
+            //         'status' => 0,
+            //         'message' => 'Authorization token not provided',
+            //     ], 200); // Bad Request
+            // }
 
             // Find the user associated with the api_token
             // $user = Userslogin::whereRaw('LOWER(api_token) = ?', [strtolower($apiToken)])->first();
 
             // Find the user associated with the api_token and device_name in the user_tokens table
-            $tokenEntry = DB::table('user_tokens')
-                ->whereRaw('LOWER(api_token) = ?', [strtolower($apiToken)])
-                ->where('device_name', $deviceName)
-                ->first();
+
+            // $tokenEntry = DB::table('user_tokens')
+            //     ->whereRaw('LOWER(api_token) = ?', [strtolower($apiToken)])
+            //     ->where('device_name', $deviceName)
+            //     ->first();
 
             // Check if the token entry was found
-            if (!$tokenEntry) {
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'Token is invalid for this device',
-                ], 200); // Unauthorized
-            }
+            // if (!$tokenEntry) {
+            //     return response()->json([
+            //         'status' => 0,
+            //         'message' => 'Token is invalid for this device',
+            //     ], 200); // Unauthorized
+            // }
 
             // Fetch the user associated with the token entry
-            $user = userslogin::find($tokenEntry->user_id);
+            // $user = userslogin::find($tokenEntry->user_id);
 
-            if (!$user) {
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'Token is invalid',
-                ], 200); // Unauthorized
-            }
+            // if (!$user) {
+            //     return response()->json([
+            //         'status' => 0,
+            //         'message' => 'Token is invalid',
+            //     ], 200); // Unauthorized
+            // }
 
             // Fetch items created by the authenticated user
-            $items = Item::where('created_by', $user->id)
-                ->select('id', 'item_name')
+            $items = DB::table('item_master')
+                ->select('item_id', 'item_name')
                 ->get();
 
             // Return the response in the desired format
@@ -72,7 +74,7 @@ class ItemController extends Controller
                 'records' => [
                     'data' => $items->map(function ($item) {
                         return [
-                            'id' => $item->id,
+                            'id' => $item->item_id,
                             'item_name' => $item->item_name,
                         ];
                     }),

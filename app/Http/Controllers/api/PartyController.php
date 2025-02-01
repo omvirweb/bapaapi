@@ -17,58 +17,57 @@ class PartyController extends Controller
     {
         try {
             // Log the request data
-            TransactionsLog::create([
-                'request_data' => json_encode($request->all()),
-            ]);
+            // TransactionsLog::create([
+            //     'request_data' => json_encode($request->all()),
+            // ]);
             // Retrieve the api_token from the request headers
             // $apiToken = str_replace('Bearer ', '', $request->header('Authorization'));
 
             // Retrieve the api_token from the request parameters
-            $apiToken = $request->input('api_token');
-            $deviceName = $request->input('device_name') ?? 'Unknown Device';
+            // $apiToken = $request->input('api_token');
+            // $deviceName = $request->input('device_name') ?? 'Unknown Device';
 
             // Check if the api_token was provided
-            if (!$apiToken) {
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'Authorization token not provided',
-                ], 200); // Bad Request
-            }
+            // if (!$apiToken) {
+            //     return response()->json([
+            //         'status' => 0,
+            //         'message' => 'Authorization token not provided',
+            //     ], 200); // Bad Request
+            // }
 
             // Find the user associated with the api_token
             // $user = userslogin::whereRaw('LOWER(api_token) = ?', [strtolower($apiToken)])->first();
 
             // Find the user associated with the api_token and device_name in the user_tokens table
-            $tokenEntry = DB::table('user_tokens')
-                ->whereRaw('LOWER(api_token) = ?', [strtolower($apiToken)])
-                ->where('device_name', $deviceName)
-                ->first();
+            // $tokenEntry = DB::table('user_tokens')
+            //     ->whereRaw('LOWER(api_token) = ?', [strtolower($apiToken)])
+            //     ->where('device_name', $deviceName)
+            //     ->first();
 
             // Check if the token entry was found
-            if (!$tokenEntry) {
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'Token is invalid for this device',
-                ], 200); // Unauthorized
-            }
+            // if (!$tokenEntry) {
+            //     return response()->json([
+            //         'status' => 0,
+            //         'message' => 'Token is invalid for this device',
+            //     ], 200); // Unauthorized
+            // }
 
             // Fetch the user associated with the token entry
-            $user = userslogin::find($tokenEntry->user_id);
+            // $user = userslogin::find($tokenEntry->user_id);
 
-            if (!$user) {
-                return response()->json([
-                    'status' => 0,
-                    // 'message' => 'User not authenticated',
-                    'message' => 'Token is invalid',
-                ], 200); // Unauthorized
-            }
+            // if (!$user) {
+            //     return response()->json([
+            //         'status' => 0,
+            //         // 'message' => 'User not authenticated',
+            //         'message' => 'Token is invalid',
+            //     ], 200); // Unauthorized
+            // }
 
-            // Fetch the party list associated with the authenticated user
-            $parties = Transaction::where('user_id', $user->id)
-                ->join('parties', 'transactions.party_id', '=', 'parties.id') // Join with the parties table
-                ->select('parties.id', 'parties.party_name') // Select relevant fields from the parties table
-                ->distinct() // Ensure unique party names are returned
+
+                $parties = DB::table('account')
+                ->select('account_id', 'account_name')
                 ->get();
+
 
             if ($parties->isEmpty()) {
                 return response()->json([
