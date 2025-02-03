@@ -88,26 +88,33 @@ class TransactionController extends Controller
             } else {
                 return response()->json(['status' => 0, 'message' => 'Party is required'], 400);
             }
-
             // Step 2: Check if sell record exists for the same date & account_id
             $sell = DB::table('sell')
                 ->where('sell_date', $request->date)
                 ->where('account_id', $account->account_id)
                 ->first();
+            DB::table('account')
+                ->where('account_id', $account->account_id)
+                ->update(['gold_fine' => $account->gold_fine + $request->fine]);
 
             if ($sell) {
                 // Update remark if the record already exists
                 DB::table('sell')
                     ->where('sell_id', $sell->sell_id)
-                    ->update(['sell_remark' => $request->note]);
+                    ->update(['sell_remark' => $request->note, 'total_gold_fine' => $sell->total_gold_fine + $request->fine]);
 
                 $sell_id = $sell->sell_id;
             } else {
+                $lastSellNo = DB::table('sell')->max('sell_no');
+                $newSellNo = $lastSellNo ? $lastSellNo + 1 : 1;
                 // Insert new sell record
                 $sell_id = DB::table('sell')->insertGetId([
                     'sell_date' => $request->date,
                     'account_id' => $account->account_id,
                     'sell_remark' => $request->note,
+                    'sell_no' => $newSellNo,
+                    'process_id' => 4133,
+                    'total_gold_fine' => $request->fine ?? 0,
                 ]);
 
                 $sell = DB::table('sell')->where('sell_id', $sell_id)->first();
@@ -174,7 +181,8 @@ class TransactionController extends Controller
                     'touch_id' => $request->touch ?? 0,
                     'wstg' => $request->wastage ?? 0,
                     'fine' => $request->fine ?? 0,
-                    'type' => 1, // 1 For Sell 
+                    'type' => 1, // 1 For Sell  
+                    'category_id' => $item->category_id ?? null, // 1 For Sell  
                 ]);
                 $transaction = DB::table('sell_items')->where('sell_item_id', $transaction_id)->first();
                 $message = 'Record created successfully';
@@ -205,7 +213,7 @@ class TransactionController extends Controller
             // Return an error response
             return response()->json([
                 'status' => 0,
-                'message' => 'An error occurred while processing the request',
+                'message' => 'An error occurred while processing the request' . $e->getMessage(),
             ], 200); // Internal Server Error
         }
     }
