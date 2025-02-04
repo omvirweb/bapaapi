@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
+
 class TransactionController extends Controller
 {
     public function sellItem(Request $request)
@@ -181,8 +182,8 @@ class TransactionController extends Controller
                     'touch_id' => $request->touch ?? 0,
                     'wstg' => $request->wastage ?? 0,
                     'fine' => $request->fine ?? 0,
-                    'type' => 1, // 1 For Sell  
-                    'category_id' => $item->category_id ?? null, // 1 For Sell  
+                    'type' => 1, // 1 For Sell
+                    'category_id' => $item->category_id ?? null, // 1 For Sell
                 ]);
                 $transaction = DB::table('sell_items')->where('sell_item_id', $transaction_id)->first();
                 $message = 'Record created successfully';
@@ -199,7 +200,6 @@ class TransactionController extends Controller
                     'item' => $item,
                 ],
             ], 200);
-
         } catch (\Exception $e) {
             // Log the error message and stack trace
             Log::channel('custom_errorlog')->error('Error in issueItem: ' . $e->getMessage(), ['exception' => $e]);
@@ -863,24 +863,10 @@ class TransactionController extends Controller
         $request->validate([
             'sell_id' => 'required|integer',
         ]);
-
         $sell_id = $request->sell_id;
         $url = "http://20.244.92.124/bapa/sell/sell_print/" . $sell_id;
-
-        // Fetch the PDF from the external URL
-        $response = Http::get($url);
-
-        if ($response->successful()) {
-            // Encode PDF content to Base64
-            $pdfBase64 = base64_encode($response->body());
-
-            // Return PDF as Base64 encoded string
-            return response()->json([
-                'pdf' => $pdfBase64,
-            ]);
-        }
-
-        return response()->json(['error' => 'PDF not found'], 404);
+        return response()->json([
+            'pdf' => $url,
+        ]);
     }
-
 }
