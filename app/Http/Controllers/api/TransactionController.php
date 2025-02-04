@@ -75,6 +75,7 @@ class TransactionController extends Controller
                 if (!$account) {
                     $account_id = DB::table('account')->insertGetId([
                         'account_name' => $request->party_name,
+                        'account_group_id' => config('const.CUSTOMER_GROUP'),
                     ]);
 
                     $account = DB::table('account')->where('account_id', $account_id)->first();
