@@ -864,7 +864,7 @@ class TransactionController extends Controller
             'sell_id' => 'required|integer',
         ]);
         $sell_id = $request->sell_id;
-        $url = "http://20.244.92.124/bapa/sell/sell_print/" . $sell_id;
+        $url = "http://20.244.92.124/bapa/reports/print_item_rfid_tag/" . $sell_id;
         return response()->json([
             'pdf' => $url,
         ]);
