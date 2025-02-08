@@ -46,6 +46,12 @@ class ItemStockRfidController extends Controller
         } else {
             return response()->json(['status' => 0, 'message' => 'Party is required'], 400);
         }
+        $item_stock = DB::table('item_stock')
+            ->where('item_stock_id', $item->item_stock_id)
+            ->first();
+        if ($item_stock) {
+            $item->item_id = $item_stock->item_id;
+        }
         $wastage = 0;
         // Check for party item details
         $party_item_details = DB::table('party_item_details')
@@ -54,10 +60,6 @@ class ItemStockRfidController extends Controller
         if ($party_item_details) {
             $wastage = $party_item_details->wstg;
         } else {
-            // Get the default item details
-            $item_stock = DB::table('item_stock')
-                ->where('item_stock_id', $item->item_stock_id)
-                ->first();
             if ($item_stock) {
                 $item_master = DB::table('item_master')
                     ->where('item_id', $item_stock->item_id)
